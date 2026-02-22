@@ -1,5 +1,5 @@
 # Modern Full-Stack Auth Starter
-基於現代化架構 (ASP.NET Core 8 + Vue 3) 的全端會員認證系統，整合 OAuth2 , 雙 Token 安全驗證機制，透過 Redis 控管憑證生命週期，且支援完整的容器化部署流程。
+基於現代化架構 (ASP.NET Core 8 + Vue 3) 的全端會員認證系統，整合 OAuth2 , 雙 Token 安全驗證機制，透過 Redis 控管憑證生命週期，並導入 RabbitMQ 處理非同步任務，且支援完整的容器化部署流程。
 - 前端專案: [modern-auth-vue](https://github.com/JiaYingDai/modern-auth-vue)
 - 後端專案: [modern-auth-api](https://github.com/JiaYingDai/modern-auth-api)
 
@@ -30,6 +30,7 @@
 ### 系統架構 & DevOps
   - 整潔式架構: 後端採用三層式架構 (展示層-業務邏輯層-資料存取層)，確保業務邏輯與資料存取解耦，易於測試與維護。
   - Redis Token 生命週期管理: 整合 Redis 處理 Refresh Token 與 一次性驗證 Token ，利用 TTL (Time-To-Live) 自動控管 Token 時效，降低資料庫負載、提升驗證效能。
+  - 非同步任務處理 (RabbitMQ): 將寄送信件等高延遲任務移交給背景 Worker (Consumer) ，透過 Message Queue 非同步處理，大幅降低 API 回應時間並提升系統吞吐量。
   - 容器化與 CI/CD 自動化部署: 採用前後端分離架構，前端部署於 Vercel，後端容器化 (Docker) 部署至 Render。整合 GitHub Actions 建立自動化 CI / CD 流程，加速從代碼提交到生產部署。資料庫與儲存則託管於 Supabase。
 
 
@@ -88,6 +89,10 @@
       <td>分散式快取，利用 TTL 機制管理 Refresh Token 與一次性 Token (OTP) 生命週期</td>
     </tr>
     <tr>
+<td><b>RabbitMQ</b></td>
+<td>訊息佇列 (Message Broker)，負責解耦 API 與耗時任務 (如信件發送)，實現非同步處理架構</td>
+</tr>
+    <tr>
       <td><b>Docker</b></td>
       <td>應用程式容器化，確保開發、測試與生產環境的一致性</td>
     </tr>
@@ -133,8 +138,12 @@ flowchart TB
         end
         
         Redis[("Redis Cache")]
+        MQ[["RabbitMQ (Message Queue)"]]
+        Worker["Background Service (Consumer)"]
         
         PL --> BL --> DAL
+        BL -- "Publish Task (Email)" --> MQ
+        MQ -- "Consume Task" --> Worker
     end
 
     subgraph Supabase_BaaS["Supabase BaaS"]
@@ -164,19 +173,19 @@ flowchart TB
     %% 系統互動連線
     User -- HTTPS --> Vue
     Vue -- "RESTful API (JWT + Cookie)" --> PL
-    BL <-- "Store / Get Refresh Token & OTP (TTL)" --> Redis
+    BL <-- "Store / Get Refresh Token & OTP" --> Redis
     DAL -- "Data Access" --> ORM
     ORM -- "CRUD" --> DB
     BL -- "Upload Files" --> Storage
-    BL -- "Send Email" --> Email
+    Worker -- "Send Email" --> Email
     Vue -- "OAuth2 Callback" --> Google
     Google -- "Verify Token" --> PL
     
     classDef plain fill:#fff,stroke:#333,stroke-width:1px
     classDef db fill:#f9f9f9,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
     
-    class Vue,Clean_Arch,PL,BL,DAL,Auth,Email,Google,Vite,Pinia,Vuetify,Actions,Vercel_CI plain
-    class Redis,DB,Storage,ORM db
+    class Vue,Clean_Arch,PL,BL,DAL,Auth,Email,Google,Vite,Pinia,Vuetify,Actions,Vercel_CI,Worker plain
+    class Redis,DB,Storage,ORM,MQ db
 ```
 
 ## Getting Started
@@ -188,6 +197,7 @@ flowchart TB
 - .NET 8.0 SDK
 - Database: 註冊 Supabase (或本機 PostgreSQL)
 - Cache: Redis (建議可使用 Docker 安裝)
+- Message Queue: RabbitMQ (建議可使用 Docker 安裝)
 - IDE: VS Code / Visual Studio 2022
 
 ### 安裝 & 執行
@@ -301,6 +311,10 @@ npm run dev
   // Redis 連線設定
   "Redis": {
     "ConnectionString": <value>
+  },
+  // Rabbit MQ 連線設定
+  "RabbitMq": {
+    "ConnectionString": "<value>"
   }
 }
 ```
@@ -336,7 +350,9 @@ dotnet ef database update
       - Instance Type: 選擇 【Free】。
       - 點擊 【Create Redis】。
     - 建立完成後，複製 Internal Connection String (通常格式為 redis://...:6379)，這就是稍後環境變數 Redis__ConnectionString 的值 (注意: 填寫時需去掉開頭的【redis://】)。
-  
+  - 建置 RabbitMQ 服務
+    - 至 CloudAMQP 註冊並建立一個 free 的 Lemur 實體。
+    - 建立完成後，取得 URL 連線資訊，作為後續 Render 環境變數的設置。
   - 建置 Web Service (後端 API)
     - 至 Render 開啟 新服務 【WebService】。
     - 在 【New Web Service】 介面，選擇 【Existing Image】，貼上預計 Push 的 Image 路徑 (若第一次部署， Image 尚未建立，可先隨意填公開的 Image 讓服務先建立起來，待 GitHub Actions 跑完後會自動更新)。
@@ -348,6 +364,7 @@ dotnet ef database update
       - ASPNETCORE_ENVIRONMENT: 服務啟動環境，如: 正式環境則為 <code> Production </code>, 測試環境則為 <code> Development </code>。
       - ConnectionStrings__DefaultConnection: Supabase 的 Connection String
       - Redis__ConnectionString: 填入剛剛建立的 Redis Internal Connection String (注意: 填寫時需去掉開頭的【redis://】)
+      - RabbitMq__ConnectionString: 填入剛剛建立的 RabbitMQ URL
       - ResendApiKey: Resend API Key
       - SecurityKey: JWT 簽章用的密鑰，需長一點
       - Supabase__ApiKey: Supabase Anon Key (Storage用的)
