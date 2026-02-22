@@ -1,0 +1,41 @@
+# =========================
+# 編輯器與 IDE (Visual Studio, VS Code, Rider)
+# =========================
+.vs/
+.idea/
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+*.user
+*.suo
+
+# =========================
+# 建置與編譯輸出 (Build Results)
+# =========================
+[Dd]ebug/
+[Rr]elease/
+bin/
+obj/
+
+# =========================
+# 測試報告 (Testing)
+# =========================
+TestResults/
+
+# =========================
+# 環境變數與機密檔案 (Secrets & Configs)
+# =========================
+.env
+.env.docker
+modern_auth_api/appsettings.Local.json
+
+# =========================
+# 作業系統暫存檔 (OS Files)
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# 日誌檔 (Logs)
+# =========================
+*.log

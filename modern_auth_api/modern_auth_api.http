@@ -1,0 +1,6 @@
+@modern_auth_api_HostAddress = http://localhost:5179
+
+GET {{modern_auth_api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

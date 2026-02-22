@@ -1,0 +1,64 @@
+name: Build and Publish image to GHCR
+
+on:
+  push:
+    branches: ["main", "develop"] # 只監聽main, develop分支push事件
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: "9.0.x" # The .NET SDK version to use (抓取最新補丁版本)
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # 必須要有寫入Package的權限
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 設定.NET環境
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # 還原依賴
+      - name: Install dependencies
+        run: dotnet restore ./modern_auth_api.Tests/modern_auth_api.Tests.csproj
+
+      # 單元測試
+      - name: Test
+        run: dotnet test ./modern_auth_api.Tests/modern_auth_api.Tests.csproj --no-restore --verbosity normal
+
+      # 測試完才做Docker Image
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # 使用內建Token，不需手動設定
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,format=short
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # 程式碼位置
+          file: ./Dockerfile # Dockerfile位置
+          push: true # 做完後是否直接推到GHCR
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Trigger Render Delploy
+        run: curl -X POST "${{secrets.RENDER_DEPLOY_HOOK}}"

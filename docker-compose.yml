@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+    # 後端服務
+    backend:
+        build: . # 使用 當前目錄中的 Dockerfile
+        container_name: modern_auth_api # 指定容器名稱，方便識別
+        image: modern_auth_api # image名稱
+        ports:
+            - "7073:8080" # 我的電腦 7073 -> 對應容器內部 8080
+        environment:
+            - TZ=Asia/Taipei
+            - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENV}
+            - ConnectionStrings__DefaultConnection=${CONN_STR_DEFAULT}
+            - SecurityKey=${SECETKEY}
+            - MailServerSetting__Password=${MAIL_SERVER_PWD}
+            - Supabase__Url=${SUPABASE_URL}
+            - Supabase__ApiKey=${SUPABASE_APIKEY}
+            - ResendApiKey=${RESEND_APIKEY}
+        extra_hosts:
+            - "host.docker.internal:host-gateway" # 讓 Linux 容器認得 host.docker.internal
+        depends_on:
+            - myredis
+    myredis:
+       image: redis:alpine
+       ports:
+          - "6379:6379"

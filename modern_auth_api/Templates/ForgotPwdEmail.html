@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>重設密碼</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .header {
+            background-color: #F56C6C;
+            padding: 20px;
+            text-align: center;
+        }
+            /* 使用紅色系代表安全警示 */
+            .header h1 {
+                color: #ffffff;
+                margin: 0;
+                font-size: 24px;
+            }
+
+        .content {
+            padding: 30px;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #F56C6C;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+        }
+
+        .warning {
+            background-color: #fff6f6;
+            border-left: 4px solid #F56C6C;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .link-text {
+            color: #F56C6C;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>密碼重設請求</h1>
+        </div>
+        <div class="content">
+            <h2>Hi, {UserName}</h2>
+            <p>我們收到了一個重設您帳號密碼的請求。如果是您本人的操作，請點擊下方按鈕進行重設：</p>
+
+            <div style="text-align: center;">
+                <a href="{Link}" class="button" style="color: #ffffff;">重設密碼</a>
+            </div>
+
+            <div class="warning">
+                <strong>注意：</strong>
+                <p style="margin: 5px 0 0 0;">如果您沒有提出此請求，請忽略這封郵件，您的密碼將不會有任何變更。</p>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+                如果按鈕無法點擊，請複製以下連結並貼上至瀏覽器：<br>
+                <a href="{Link}" class="link-text">{Link}</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>這是一封系統自動發送的郵件，請勿直接回覆。</p>
+        </div>
+    </div>
+</body>
+</html>

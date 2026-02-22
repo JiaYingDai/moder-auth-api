@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36811.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "modern_auth_api.Tests", "modern_auth_api.Tests\modern_auth_api.Tests.csproj", "{4F28DF76-D44E-EBA2-CCD3-505B25D459F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "modern_auth_api", "modern_auth_api\modern_auth_api.csproj", "{0C5C4974-46C0-3A2B-81FC-B6E87A4C7786}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4F28DF76-D44E-EBA2-CCD3-505B25D459F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F28DF76-D44E-EBA2-CCD3-505B25D459F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F28DF76-D44E-EBA2-CCD3-505B25D459F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F28DF76-D44E-EBA2-CCD3-505B25D459F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C5C4974-46C0-3A2B-81FC-B6E87A4C7786}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C5C4974-46C0-3A2B-81FC-B6E87A4C7786}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C5C4974-46C0-3A2B-81FC-B6E87A4C7786}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C5C4974-46C0-3A2B-81FC-B6E87A4C7786}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44D54B85-B12D-4EFD-BEC2-88459D7D7BE7}
+	EndGlobalSection
+EndGlobal

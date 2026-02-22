@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>驗證您的 Email</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .header {
+            background-color: #409EFF;
+            padding: 20px;
+            text-align: center;
+        }
+            /* Element Plus Primary Color */
+            .header h1 {
+                color: #ffffff;
+                margin: 0;
+                font-size: 24px;
+            }
+
+        .content {
+            padding: 30px;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #409EFF;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+        }
+
+        .link-text {
+            color: #409EFF;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>歡迎加入我們！</h1>
+        </div>
+        <div class="content">
+            <h2>Hi, {UserName}</h2>
+            <p>感謝您註冊我們的服務。為了確保您的帳號安全，請點擊下方的按鈕來驗證您的電子信箱：</p>
+
+            <div style="text-align: center;">
+                <a href="{Link}" class="button" style="color: #ffffff;">驗證我的 Email</a>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+                如果按鈕無法點擊，請複製以下連結並貼上至瀏覽器：<br>
+                <a href="{Link}" class="link-text">{Link}</a>
+            </p>
+        </div>
+        <div class="footer">
+            <p>這是一封系統自動發送的郵件，請勿直接回覆。</p>
+        </div>
+    </div>
+</body>
+</html>
