@@ -210,7 +210,7 @@ cd modern-auth-vue
 npm install
 ```
 
-  - 設定環境變數 (.env): 在moder-auth-vue專案根目錄下建立/修改 .env.loacl，填入所需變數 (值如為<value>，自行填入數值)
+  - 設定環境變數 (.env): 在modern-auth-vue專案根目錄下建立/修改 .env.loacl，填入所需變數 (值如為<value>，自行填入數值)
 ```bash
 #.env.local
 # Google OAuth Client ID
@@ -228,7 +228,7 @@ npm run dev
 前端預設會運行在 https://localhost:5173
 
 3. 後端設定 (建議 IDE : Visual Studio 2022)
-  - 設定環境變數 (appsettings.json): 在moder-auth-api專案根目錄下建立/修改 appsettings, appsettings.Development.json，填入所需變數
+  - 設定環境變數 (appsettings.json): 在modern_auth_api專案根目錄下建立/修改 appsettings, appsettings.Development.json，填入所需變數
     - 註1: 值如為 <code>value</code>，自行填入數值
     - 註2: 敏感性資料建議以 aecrets.json方式儲存
 
