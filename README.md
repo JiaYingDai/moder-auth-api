@@ -1,12 +1,12 @@
 # Modern Full-Stack Auth Starter
-基於現代化架構 (ASP.NET Core 8 + Vue 3) 的全端會員驗證解決方案，整合 OAuth2 , 雙 Token 安全驗證機制與容器化部署流程。
-- 前端專案: [modern_auth_vue](https://github.com/JiaYingDai/modern_auth_vue)
-- 後端專案: [modern_auth_api](https://github.com/JiaYingDai/modern_auth_api)
+基於現代化架構 (ASP.NET Core 8 + Vue 3) 的全端會員認證系統，整合 OAuth2 , 雙 Token 安全驗證機制，透過 Redis 控管憑證生命週期，且支援完整的容器化部署流程。
+- 前端專案: [modern-auth-vue](https://github.com/JiaYingDai/modern-auth-vue)
+- 後端專案: [modern-auth-api](https://github.com/JiaYingDai/modern-auth-api)
 
 - Demo Website: [Modern Full-Stack Auth Starter](https://modern-auth-vue-git-develop-lisas-projects-7d037450.vercel.app)  
   (⚠️Demo Website 測試須知: 開發階段受限於第三方信件服務的限制，系統產生的「註冊驗證信」與「忘記密碼信」目前僅供開發者網域接收。一般訪客請直接使用「Google 第三方登入」即可快速體驗完整功能！)
 
-- API 文件: [modern_auth_api API文件](https://docs.google.com/document/d/1fulGMic8bEc8mv0EP6BKKTb2-M9F0NC_hG1JUpx1vbM/edit?usp=sharing)
+- API 文件: [modern-auth-api API文件](https://docs.google.com/document/d/1fulGMic8bEc8mv0EP6BKKTb2-M9F0NC_hG1JUpx1vbM/edit?usp=sharing)
 
 ## 功能簡述
 - 會員登入
@@ -195,22 +195,22 @@ flowchart TB
 
 ```bash
 # 前端專案
-git clone https://github.com/JiaYingDai/modern_auth_vue.git
+git clone https://github.com/JiaYingDai/modern-auth-vue.git
 
 # 後端專案
-git clone https://github.com/JiaYingDai/modern_auth_api.git
+git clone https://github.com/JiaYingDai/modern-auth-api.git
 ```
 
 2. 前端設定 (建議 IDE : Visual Studio Code)
   - 進入專案下，並安裝專案所需套件
 ```bash
 // 進入專案下
-cd modern_auth_vue
+cd modern-auth-vue
 // 安裝依賴
 npm install
 ```
 
-  - 設定環境變數 (.env): 在moder_auth_vue專案根目錄下建立/修改 .env.loacl，填入所需變數 (值如為<value>，自行填入數值)
+  - 設定環境變數 (.env): 在moder-auth-vue專案根目錄下建立/修改 .env.loacl，填入所需變數 (值如為<value>，自行填入數值)
 ```bash
 #.env.local
 # Google OAuth Client ID
@@ -228,7 +228,7 @@ npm run dev
 前端預設會運行在 https://localhost:5173
 
 3. 後端設定 (建議 IDE : Visual Studio 2022)
-  - 設定環境變數 (appsettings.json): 在moder_auth_api專案根目錄下建立/修改 appsettings, appsettings.Development.json，填入所需變數
+  - 設定環境變數 (appsettings.json): 在moder-auth-api專案根目錄下建立/修改 appsettings, appsettings.Development.json，填入所需變數
     - 註1: 值如為 <code>value</code>，自行填入數值
     - 註2: 敏感性資料建議以 aecrets.json方式儲存
 
@@ -318,14 +318,14 @@ dotnet ef database update
 
 
 ### CI/CD & 部署
-1. 本專案使用 GitHub Actions (掛在 modern_auth_api 專案下) 進行自動化部署
+1. 本專案使用 GitHub Actions (掛在 modern-auth-api 專案下) 進行自動化部署
   - 前端: 自動部署到 Vercel
   - 後端: 自動部署到 Render (先經由 Docker 容器化)
 
 2. 部署前置作業
 - 前端: Vercel
   - 至 Vercel 開啟新的 Project。
-  - 在 【Import Git Repository】 的地方選擇 前端專案 modern_auth_vue。
+  - 在 【Import Git Repository】 的地方選擇 前端專案 modern-auth-vue。
   - 可自行為專案取名，而後即可按下 【Deploy】 按鈕 (專案所需環境變數可於之後設置)。
 
 - 後端: Render
@@ -356,7 +356,7 @@ dotnet ef database update
   - 建立服務後，進入該服務的 Dashboard，到 【Settings】下尋找 【Deploy】區塊的 【Deploy Hook】，這就是稍後要填入 GitHub Secrets 的 RENDER_DEPLOY_HOOK。
 
 3. GitHub Actions 所需變數 須至 GitHub 的 【Actions secrets and variables】 設置
-- 開啟 modern_auth_api 專案
+- 開啟 modern-auth-api 專案
 - 點擊 【Settings】
 - 左方側邊欄 選取 Security 分類下的【Secrets and variables】，下拉選單再選 【Actions】
 - 在 Secrets 頁籤下，即可新增 Environment secrets。
