@@ -4,7 +4,9 @@
 - 後端專案: [modern-auth-api](https://github.com/JiaYingDai/modern-auth-api)
 
 - Demo Website: [Modern Full-Stack Auth Starter](https://modern-auth-vue-git-develop-lisas-projects-7d037450.vercel.app)  
-  (⚠️Demo Website 測試須知: 開發階段受限於第三方信件服務的限制，系統產生的「註冊驗證信」與「忘記密碼信」目前僅供開發者網域接收。一般訪客請直接使用「Google 第三方登入」即可快速體驗完整功能！)
+- ⚠️Demo Website 測試須知:
+  - 登入方式建議: 開發階段受限於第三方信件服務限制，系統產生的「註冊驗證信」與「忘記密碼信」目前僅供開發者網域接收。一般訪客請直接使用「Google 第三方登入」即可快速體驗完整功能！
+  - 系統啟動說明: 本站部署於 Render 環境，若長時間未執行會進入休眠狀態。初次連線需等待約 30-60 秒進行「冷啟動」，請稍後片刻。
 
 - API 文件: [modern-auth-api API文件](https://docs.google.com/document/d/1fulGMic8bEc8mv0EP6BKKTb2-M9F0NC_hG1JUpx1vbM/edit?usp=sharing)
 
