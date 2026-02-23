@@ -57,6 +57,9 @@ builder.Services.AddTransient<IResend, ResendClient>();
 // Register Redis singleton
 builder.Services.AddSingleton<Redis>();
 
+// Register RabbitMQ singleton
+builder.Services.AddSingleton<modern_auth_api.Service.RabbitMQ>();
+
 // 註冊Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUsersTokenRepository, RedisUsersTokenRepository>();
@@ -66,8 +69,12 @@ builder.Services.AddScoped<IUsersTokenRepository, RedisUsersTokenRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHashService, Argon2HashService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageSupabaseService>();
-builder.Services.AddScoped<IMailService, ResendAPIMailService>();
+builder.Services.AddKeyedScoped<IMailService, RabbitMQMailService>("producer"); // 根據標籤決定注入何者。producer使用的mailService
+builder.Services.AddKeyedScoped<IMailService, ResendAPIMailService>("consumer"); // 根據標籤決定注入何者。producer使用的mailService
 builder.Services.AddScoped<IUsersTokenService, UsersTokenService>();
+
+// 註冊背景處理
+builder.Services.AddHostedService<EmailConsumerService>();
 
 // Authentication
 var securityKey = builder.Configuration["SecurityKey"];
@@ -140,6 +147,15 @@ using (var scope = app.Services.CreateScope())
 
     await redis.ConnectAsync(endpoint);
 }
+
+// Initialize RabbitMQ connection
+using (var scope = app.Services.CreateScope())
+{
+    var rabbitMq = scope.ServiceProvider.GetRequiredService<modern_auth_api.Service.RabbitMQ>();
+    var connectionString = app.Configuration.GetValue<string>("RabbitMq:ConnectionString") ?? string.Empty;
+    await rabbitMq.ConnectAsync(connectionString);
+}
+
 
 app.UseHttpsRedirection();
 

@@ -36,7 +36,7 @@ namespace modern_auth_api.Service
         private ISupabaseClient _client;
 
 
-        public UserService(IConfiguration configuration, IUserRepository repo, IHashService hashService, IFileStorageService fileStorageService, IMailService mailService, IUsersTokenService usersTokenService, PostgresContext dbContext, ILogger<UserService> logger, ISupabaseClient client)
+        public UserService(IConfiguration configuration, IUserRepository repo, IHashService hashService, IFileStorageService fileStorageService, [FromKeyedServices("producer")]IMailService mailService, IUsersTokenService usersTokenService, PostgresContext dbContext, ILogger<UserService> logger, ISupabaseClient client)
         {
             _configuration = configuration;
             _repo = repo;
@@ -147,7 +147,7 @@ namespace modern_auth_api.Service
             // 3. 準備寄送驗證信
             try
             {
-            await SendConfirmMailAsync(userId, registerDto.CallBackUrl, registerDto.Name, registerDto.Email, registerDto.Type);
+                await SendConfirmMailAsync(userId, registerDto.CallBackUrl, registerDto.Name, registerDto.Email, registerDto.Type);
 
                 return ServiceResult.Success();
             }
@@ -223,9 +223,6 @@ namespace modern_auth_api.Service
             }
             catch (Exception ex) {
                 _logger.LogError(ex, $"寄送驗證信失敗。Email: {dto.Email}, UserId: {entity.Id}");
-
-                // 因寄信失敗，須把剛剛新增的使用者刪除
-                await _repo.DeleteUserAsync(entity.Id);
 
                 // 拋出異常
                 return ServiceResult.Fail(ErrorCodeEnum.System_EmailSendFailed, "寄送註冊驗證信失敗，請稍後再試或聯繫客服");
@@ -499,7 +496,7 @@ namespace modern_auth_api.Service
 
             // 2. 發送註冊驗證信
             // 2-1. Mail Server設定
-            MailSeverSetting mailServerSetting = new MailSeverSetting()
+            MailServerSetting mailServerSetting = new MailServerSetting()
             {
                 SmtpHost = _configuration.GetValue<string>("MailServerSetting:SmtpHost") ?? "",
                 SmtpPort = _configuration.GetValue<int>("MailServerSetting:SmtpPort", 0),
@@ -541,7 +538,10 @@ namespace modern_auth_api.Service
             };
 
             // 3. 發送信件
-            await _mailService.SendMail(mailServerSetting, mailSetting);
+            await _mailService.SendMail(new SendMailModel {
+                MailServerSetting = mailServerSetting,
+                MailSetting = mailSetting
+            });
         }
 
         // 產生驗證信連結

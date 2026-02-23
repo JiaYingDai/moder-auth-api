@@ -13,14 +13,14 @@ namespace modern_auth_api.Service
             _resend = resend;
         }
 
-        public async Task SendMail(MailSeverSetting mailServerSetting, MailSetting mailSetting)
+        public async Task SendMail(SendMailModel sendMailModel)
         {
             var message = new EmailMessage();
-            message.From = mailSetting.FromEmail;  // 寄件人
-            message.To.Add(mailSetting.ToEmail); // 收件人
-            message.Subject = mailSetting.Subject ?? string.Empty;    // 主旨
-            message.HtmlBody = mailSetting.Body?.Html; // html內容
-            message.TextBody = mailSetting.Body?.Text; // 純文字內容
+            message.From = sendMailModel.MailSetting.FromEmail;  // 寄件人
+            message.To.Add(sendMailModel.MailSetting.ToEmail); // 收件人
+            message.Subject = sendMailModel.MailSetting.Subject ?? string.Empty;    // 主旨
+            message.HtmlBody = sendMailModel.MailSetting.Body?.Html; // html內容
+            message.TextBody = sendMailModel.MailSetting.Body?.Text; // 純文字內容
 
             await _resend.EmailSendAsync(message);
         }

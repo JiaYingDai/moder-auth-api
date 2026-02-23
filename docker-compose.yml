@@ -20,7 +20,22 @@ services:
             - "host.docker.internal:host-gateway" # 讓 Linux 容器認得 host.docker.internal
         depends_on:
             - myredis
+            - myrabbitmq
     myredis:
        image: redis:alpine
        ports:
           - "6379:6379"
+    
+    myrabbitmq:
+       image: rabbitmq:4-management
+       ports:
+          - "5672:5672" # 連線
+          - "15672:15672" # 管理介面
+       environment:
+          - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+          - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PWD}
+       volumes:
+          - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+    rabbitmq_data:

@@ -8,27 +8,27 @@ namespace modern_auth_api.Service
 {
     public class MailKitMailService : IMailService
     {
-        public async Task SendMail(MailSeverSetting mailServerSetting, MailSetting mailSetting)
+        public async Task SendMail(SendMailModel sendMailModel)
         {
             // 1. 建立郵件訊息
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("寄件人", mailSetting.FromEmail));
-            message.To.Add(new MailboxAddress("收件人", mailSetting.ToEmail));
-            message.Subject = mailSetting.Subject;
+            message.From.Add(new MailboxAddress("寄件人", sendMailModel.MailSetting.FromEmail));
+            message.To.Add(new MailboxAddress("收件人", sendMailModel.MailSetting.ToEmail));
+            message.Subject = sendMailModel.MailSetting.Subject;
 
             // 2. 建立郵件正文
             var bodyBuilder = new BodyBuilder();
-            bodyBuilder.HtmlBody = mailSetting.Body?.Html; // html內容
-            bodyBuilder.TextBody = mailSetting.Body?.Text; // 純文字內容
+            bodyBuilder.HtmlBody = sendMailModel.MailSetting.Body?.Html; // html內容
+            bodyBuilder.TextBody = sendMailModel.MailSetting.Body?.Text; // 純文字內容
 
             message.Body = bodyBuilder.ToMessageBody();
 
             // 3. 發送郵件
             using (var client = new SmtpClient())
             {
-                await client.ConnectAsync(mailServerSetting.SmtpHost, mailServerSetting.SmtpPort,
-                    mailServerSetting.UseSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
-                await client.AuthenticateAsync(mailSetting.FromEmail, mailSetting.Password);
+                await client.ConnectAsync(sendMailModel.MailServerSetting.SmtpHost, sendMailModel.MailServerSetting.SmtpPort,
+                    sendMailModel.MailServerSetting.UseSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
+                await client.AuthenticateAsync(sendMailModel.MailSetting.FromEmail, sendMailModel.MailSetting.Password);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
             }
