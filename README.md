@@ -21,6 +21,47 @@
 - 會員頁面
 - 登出
 
+## 系統畫面與功能展示 
+<details>
+<summary><b> 1. 註冊驗證與信件發送 (點擊展開)</b></summary>
+  <br>
+  <p>註冊頁面</p>
+  <img src="https://github.com/user-attachments/assets/7c7ba077-2a78-4b36-9a42-e591459eebbd" alt="前端註冊頁面" width="600">
+  <p>驗證信發送提示</p>
+  <img src="https://github.com/user-attachments/assets/58107432-3198-4261-bef0-2f3293df5426" alt="前端驗證信發送提示" width="600">
+  <p>註冊驗證信</p>
+  <img src="https://github.com/user-attachments/assets/7dd6b230-6e4f-4872-b7af-c78a03479db8" alt="註冊驗證信" width="600">
+  <p>重新寄送驗證信頁面 (如果註冊當下沒收到，可再點擊寄送)</p>
+  <img src="https://github.com/user-attachments/assets/aa3058c3-89a3-4839-a98a-5023182eaa98" alt="重新寄送驗證信頁面" width="600">
+</details>
+
+<details>
+<summary><b> 2. 忘記密碼與 OTP 重設流程 (點擊展開)</b></summary>
+  <br>
+  <p>忘記密碼頁面</p>
+  <img src="https://github.com/user-attachments/assets/2eec42c0-74ab-4466-a403-8ab3911a118a" alt="忘記密碼頁面" width="600">
+  <p>忘記密碼驗證信頁面</p>
+  <img src="https://github.com/user-attachments/assets/8904566d-c92e-4d3d-ba04-a20108cbf7b3" alt="忘記密碼驗證信頁面" width="600">
+  <p>重設密碼頁面</p>
+  <img src="https://github.com/user-attachments/assets/afd5a11c-6a62-498a-808f-900e6adbb58b" alt="重設密碼頁面" width="600">
+</details>
+
+<details>
+  <summary><b>3. 登入與 Google 第三方授權 (點擊展開)</b></summary>
+  <br>
+  <p>一般登入</p>
+  <img src="https://github.com/user-attachments/assets/30602aac-bff4-42b4-ba36-60130eb728fa" alt="一般登入" width="600">
+  <p>Google 第三方登入</p>
+  <img src="https://github.com/user-attachments/assets/05f60e34-ee82-4cc0-a686-0dd2a52f5d07" alt="Google 第三方登入" width="600">
+</details>
+
+<details>
+  <summary><b>4. 登入後會員資訊頁面 (點擊展開)</b></summary>
+  <br>
+  <p>會員中心 (顯示會員資訊，可更改姓名、大頭貼)</p>
+  <img src="https://github.com/user-attachments/assets/57429dc3-c0a9-4cc0-ac95-796d66e2f819" alt="會員資訊頁面" width="600">
+</details>
+
 
 ## 專案亮點 (Key Features)
 ### 身份驗證 & 資安
