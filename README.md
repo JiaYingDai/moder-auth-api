@@ -1,5 +1,5 @@
 # Modern Full-Stack Auth Starter
-基於現代化架構 (ASP.NET Core 8 + Vue 3) 的全端會員認證系統，整合 OAuth2 , 雙 Token 安全驗證機制，透過 Redis 控管憑證生命週期，並導入 RabbitMQ 處理非同步任務，且支援完整的容器化部署流程。
+基於現代化架構 (ASP.NET Core 8 + Vue 3) 的全端會員認證系統，整合 OAuth2 , 雙 Token 安全驗證機制，透過 Redis 控管憑證生命週期，並導入 RabbitMQ 處理非同步任務，結合 Serilog 與 Grafana Loki 實現集中化日誌監控，且支援完整的容器化部署流程。
 - 前端專案: [modern-auth-vue](https://github.com/JiaYingDai/modern-auth-vue)
 - 後端專案: [modern-auth-api](https://github.com/JiaYingDai/modern-auth-api)
 
@@ -33,6 +33,7 @@
   - 整潔式架構: 後端採用三層式架構 (展示層-業務邏輯層-資料存取層)，確保業務邏輯與資料存取解耦，易於測試與維護。
   - Redis Token 生命週期管理: 整合 Redis 處理 Refresh Token 與 一次性驗證 Token ，利用 TTL (Time-To-Live) 自動控管 Token 時效，降低資料庫負載、提升驗證效能。
   - 非同步任務處理 (RabbitMQ): 將寄送信件等高延遲任務移交給背景 Worker (Consumer) ，透過 Message Queue 非同步處理，大幅降低 API 回應時間並提升系統吞吐量。
+  - 集中化日誌與監控: 導入 Serilog 進行結構化日誌記錄，並將日誌透過 API 推送至 Grafana Loki。開發者可直接於 Grafana 平台即時監控系統狀態、檢視 Log 與排查錯誤，大幅提升維運效率。
   - 容器化與 CI/CD 自動化部署: 採用前後端分離架構，前端部署於 Vercel，後端容器化 (Docker) 部署至 Render。整合 GitHub Actions 建立自動化 CI / CD 流程，加速從代碼提交到生產部署。資料庫與儲存則託管於 Supabase。
 
 
@@ -99,6 +100,10 @@
       <td>應用程式容器化，確保開發、測試與生產環境的一致性</td>
     </tr>
     <tr>
+<td><b>Serilog + Loki + Grafana</b></td>
+<td><b>Serilog</b> 負責收集結構化日誌，推送至日誌聚合系統 <b>Loki</b>，並透過 <b>Grafana</b> 進行視覺化監控與錯誤排查</td>
+</tr>
+    <tr>
       <td rowspan="2"><b>第三方服務</b></td>
       <td><b>Resend API</b></td>
       <td>事務性郵件發送服務 (如：註冊驗證信)</td>
@@ -138,14 +143,23 @@ flowchart TB
             DAL["Data Access Layer"]
             ORM["EF Core / Dapper"]
         end
-        
-        Redis[("Redis Cache")]
-        MQ[["RabbitMQ (Message Queue)"]]
         Worker["Background Service (Consumer)"]
-        
-        PL --> BL --> DAL
-        BL -- "Publish Task (Email)" --> MQ
-        MQ -- "Consume Task" --> Worker
+    end
+    
+    subgraph State_MQ["Cache & Message Queue"]
+        Redis[("Redis (Local: Docker / Prod: Render)")]
+        MQ[["RabbitMQ (Local: Docker / Prod: CloudAMQP)"]]
+    end
+
+    PL --> BL --> DAL
+    BL -- "Publish Task (Email)" --> MQ
+    MQ -- "Consume Task" --> Worker
+
+    subgraph Observability["Logging"]
+        direction LR
+        Loki[["Grafana Loki (Log Aggregation)"]]
+        Grafana[["Grafana (Dashboard)"]]
+        Loki <-- "Query Logs" --> Grafana
     end
 
     subgraph Supabase_BaaS["Supabase BaaS"]
@@ -183,11 +197,15 @@ flowchart TB
     Vue -- "OAuth2 Callback" --> Google
     Google -- "Verify Token" --> PL
     
+    %% 日誌連線
+    Clean_Arch -. "Serilog Push Logs" .-> Loki
+    Worker -. "Serilog Push Logs" .-> Loki
+
     classDef plain fill:#fff,stroke:#333,stroke-width:1px
     classDef db fill:#f9f9f9,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
     
-    class Vue,Clean_Arch,PL,BL,DAL,Auth,Email,Google,Vite,Pinia,Vuetify,Actions,Vercel_CI,Worker plain
-    class Redis,DB,Storage,ORM,MQ db
+    class Vue,Clean_Arch,PL,BL,DAL,Auth,Email,Google,Vite,Pinia,Vuetify,Actions,Vercel_CI,Worker,Grafana plain
+    class Redis,DB,Storage,ORM,MQ,Loki db
 ```
 
 ## Getting Started
@@ -198,8 +216,6 @@ flowchart TB
 - Node.js (建議 v24 LTS 或更高)
 - .NET 8.0 SDK
 - Database: 註冊 Supabase (或本機 PostgreSQL)
-- Cache: Redis (建議可使用 Docker 安裝)
-- Message Queue: RabbitMQ (建議可使用 Docker 安裝)
 - IDE: VS Code / Visual Studio 2022
 
 ### 安裝 & 執行
@@ -316,13 +332,42 @@ npm run dev
   },
   // Rabbit MQ 連線設定
   "RabbitMq": {
-    "ConnectionString": "<value>"
+    "ConnectionString": <value>
+  },
+  // Serilog 設定
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "Console"
+      },
+      {
+        "Name": "GrafanaLoki",
+        "Args": {
+          "uri": <value>,
+          "credentials": {
+            "login": <value>,
+            "password": <value>
+          },
+          "labels": [
+            {
+              "key": "app",
+              "value": "modern-auth-api"
+            },
+            {
+              "key": "env",
+              "value": <value>
+            }
+          ],
+          "propertiesAsLabels": [ "Level" ]
+        }
+      }
+    ]
   }
 }
 ```
 
 - Data Migration
-在專案下的【套件管理器主控台】執行 EF Core 以建立資料表
+  - 在專案下的【套件管理器主控台】執行 EF Core 以建立資料表
 ```bash
 # 安裝 dotnet-ef
 dotnet tool install --global dotnet-ef
@@ -330,7 +375,57 @@ dotnet tool install --global dotnet-ef
 dotnet ef database update
 ```
 
-- 啟動後端 (F5)，後端預設會運行在 https://localhost:7072
+- 啟動日誌與監控服務 (Loki & Grafana)
+  - 本專案整合了 Serilog 集中化日誌，請先 clone 下 myloki 專案：
+```bash
+# myloki 專案
+git clone https://github.com/JiaYingDai/myloki.git
+```
+
+
+4. 啟動後端程式 (modern-auth-api) 與相關依賴 (Redis, RabbitMQ, Loki, Grafana) 
+- 【方法1】使用 Docker Compose 一鍵啟動
+  - 在 modern-auth-api 專案根目錄下，創建 docker 本機執行環境檔 .env.docker，可參考以下說明並填入所需變數
+    - 註1: 值如為 <code>value</code>，自行填入數值
+```env
+# .env.docker
+
+# 服務啟動環境
+ASPNETCORE_ENV="Local"
+# Supabase 的 Connection String
+CONN_STR_DEFAULT=<value>
+# JWT 簽章用的密鑰，需長一點
+SECETKEY=<value>
+# Supabase URL (Storage用的)
+SUPABASE_URL=<value>
+# Supabase Anon Key (Storage用的)
+SUPABASE_APIKEY=<value>
+# Resend API Key
+RESEND_APIKEY=<value>
+# Redis 設定密碼
+REDIS_PWD=<value>
+# RabbitMQ 設定使用者名稱
+RABBITMQ_USER=<value>
+# RabbitMQ 設定密碼
+RABBITMQ_PWD=<value>
+# Loki API (預設啟動跑在 port:3100)
+LOKI_URI="http://loki:3100"
+# Loki 專案所在根目錄
+MYLOKI_FOLDER_ROOT=<value>
+# Redis Connection String (預設啟動跑在 port:6379)
+REDIS_CONN="myredis:6379,password=<Redis密碼>"
+# RabbitMQ Connection String (預設啟動跑在 port:5672)
+RABBITMQ_CONN="amqp://<RabbitMQ使用者名稱>:<RabbitMQ密碼>@myrabbitmq:5672/"
+```
+  - 執行docker compose，啟動後，API 服務與相關依賴將一同運行。
+    - 在 modern-auth-api 專案下執行以下指令
+```bash
+docker compose --env-file .env.docker up -d --build
+```
+
+- 【方法2】使用 IDE Debug 啟動 (F5)
+  - 若需在本機進行中斷點偵錯，可開啟 Visual Studio，按下 F5 啟動後端專案。
+  - 後端預設會運行在 https://localhost:7072 。
 
 
 ### CI/CD & 部署
@@ -355,6 +450,12 @@ dotnet ef database update
   - 建置 RabbitMQ 服務
     - 至 CloudAMQP 註冊並建立一個 free 的 Lemur 實體。
     - 建立完成後，取得 URL 連線資訊，作為後續 Render 環境變數的設置。
+  - 建置 Grafana, Loki 服務
+    - 至 Grafana Cloud 註冊並選擇 Cloud Free plan
+    - 取得 URL, User, API Token
+      - 在個人頁面的左方欄位找到 自己帳號，會出現 "Manage Stack: 自己帳號"
+      - 找到 **Loki** 圖示 -> 點擊 "Details"
+      - 在 "Grafana Data Source settings" 的文字區塊內，就可以找到 URL，User 及產生 API Token，這就是稍後環境變數 Serilog__WriteTo__1__Args__uri, Serilog__WriteTo__1__Args__credentials__login, Serilog__WriteTo__1__Args__credentials__password 的值
   - 建置 Web Service (後端 API)
     - 至 Render 開啟 新服務 【WebService】。
     - 在 【New Web Service】 介面，選擇 【Existing Image】，貼上預計 Push 的 Image 路徑 (若第一次部署， Image 尚未建立，可先隨意填公開的 Image 讓服務先建立起來，待 GitHub Actions 跑完後會自動更新)。
@@ -371,6 +472,9 @@ dotnet ef database update
       - SecurityKey: JWT 簽章用的密鑰，需長一點
       - Supabase__ApiKey: Supabase Anon Key (Storage用的)
       - Supabase__Url: Supabase URL (Storage用的)
+      - Serilog__WriteTo__1__Args__uri: Grafana Logi 的 URL
+      - Serilog__WriteTo__1__Args__credentials__login: Grafana Logi 的 User
+      - Serilog__WriteTo__1__Args__credentials__password: Grafana Logi 的 API Key (Password)
   
   - 建立服務後，進入該服務的 Dashboard，到 【Settings】下尋找 【Deploy】區塊的 【Deploy Hook】，這就是稍後要填入 GitHub Secrets 的 RENDER_DEPLOY_HOOK。
 
@@ -392,4 +496,3 @@ dotnet ef database update
 - 查看狀態:
   - 前端可至 Vercel Dashboard 專案頁面查看 Deployment 狀態。
   - 後端可至 GitHub 專案上方的 【Actions】 頁籤查看綠色打勾 (Success) 或紅色叉叉 (Failed) 的 Log 紀錄。
-
