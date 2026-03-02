@@ -5,3 +5,4 @@ modern_auth_api/appsettings.Local.json
 .env
 /.env.docker
 /.env.docker
+/modern_auth_api/logs

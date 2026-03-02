@@ -22,7 +22,7 @@ namespace modern_auth_api.Repository
         }
 
         /// <summary>
-        /// Isert使用者資料庫
+        /// Insert使用者資料庫
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>

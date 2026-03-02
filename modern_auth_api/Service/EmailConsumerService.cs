@@ -7,7 +7,7 @@ namespace modern_auth_api.Service
 {
     public class EmailConsumerService : BasicConsumerService
     {
-        public EmailConsumerService(RabbitMQ rabbitMQ, ILogger<EmailConsumerService> logger, IServiceProvider serviceProvider) : base(rabbitMQ, logger, serviceProvider)
+        public EmailConsumerService(RabbitMQ rabbitMQ, ILogger<EmailConsumerService> logger, IServiceProvider serviceProvider, IConfiguration configuration) : base(rabbitMQ, logger, serviceProvider, configuration)
         {
         }
 

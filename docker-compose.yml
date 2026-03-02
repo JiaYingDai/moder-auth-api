@@ -1,4 +1,6 @@
-version: '3.8'
+include:
+  - ${MYLOKI_FOLDER_ROOT}/myloki/docker-compose.yml
+
 services:
     # 後端服務
     backend:
@@ -16,16 +18,25 @@ services:
             - Supabase__Url=${SUPABASE_URL}
             - Supabase__ApiKey=${SUPABASE_APIKEY}
             - ResendApiKey=${RESEND_APIKEY}
+            - Redis__ConnectionString=${REDIS_CONN}
+            - RabbitMq__ConnectionString=${RABBITMQ_CONN}
+            - Serilog__WriteTo__1__Args__uri=${LOKI_URI}
+        volumes:
+          - ./modern_auth_api/logs:/app/logs
         extra_hosts:
             - "host.docker.internal:host-gateway" # 讓 Linux 容器認得 host.docker.internal
         depends_on:
-            - myredis
-            - myrabbitmq
+            myrabbitmq:
+                condition: service_healthy
+            myredis:
+                condition: service_started
+            loki:
+                condition: service_started
     myredis:
        image: redis:alpine
        ports:
           - "6379:6379"
-    
+       command: redis-server --requirepass ${REDIS_PWD}
     myrabbitmq:
        image: rabbitmq:4-management
        ports:
@@ -36,6 +47,11 @@ services:
           - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PWD}
        volumes:
           - rabbitmq_data:/var/lib/rabbitmq
-
+       # 幫 RabbitMQ 健康檢查
+       healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+        interval: 5s
+        timeout: 3s
+        retries: 5
 volumes:
     rabbitmq_data:

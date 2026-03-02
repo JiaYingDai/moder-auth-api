@@ -8,16 +8,18 @@ namespace modern_auth_api.Service
 {
     public abstract class BasicConsumerService : BackgroundService
     {
+        protected readonly IConfiguration _configuration;
         private readonly RabbitMQ _rabbitMQ;
         protected readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider; // 解決 Scopped 注入 使用 IServiceProvide
         private IChannel? _channel;
 
-        public BasicConsumerService(RabbitMQ rabbitMQ, ILogger logger, IServiceProvider serviceProvider)
+        public BasicConsumerService(RabbitMQ rabbitMQ, ILogger logger, IServiceProvider serviceProvider, IConfiguration configuration)
         {
             _rabbitMQ = rabbitMQ;
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _configuration = configuration;
         }
 
         // 強迫子類別提供 QueueName
@@ -28,25 +30,31 @@ namespace modern_auth_api.Service
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("正在啟動RabbitMQ背景服務...");
-
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                // 1. 建立Channel
-                _channel = _rabbitMQ.Channel;
+                _logger.LogInformation("正在啟動RabbitMQ背景服務...");
+                try
+                {
+                    // 1. 建立Channel
+                    _channel = _rabbitMQ.Channel;
 
-                // 2. 宣告 Queue，確定 Queue 存在
-                await _channel.QueueDeclareAsync(queue: QueueName, durable: true, exclusive: false, autoDelete: false);
+                    // 2. 宣告 Queue，確定 Queue 存在
+                    await _channel.QueueDeclareAsync(queue: QueueName, durable: true, exclusive: false, autoDelete: false);
 
-                // 3. 開始消費
-                await StartConsuming(QueueName, stoppingToken);
+                    // 3. 開始消費
+                    await StartConsuming(QueueName, stoppingToken);
 
-                // 讓 BackgroundService 保持活著，直到系統關閉
-                await Task.Delay(Timeout.Infinite, stoppingToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"啟動RabbitMQ背景服務時發生錯誤，原因為:{ex.Message}");
+                    // 讓 BackgroundService 保持活著，直到系統關閉
+                    await Task.Delay(Timeout.Infinite, stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"啟動RabbitMQ背景服務時發生錯誤，原因為:{ex.Message}");
+
+                    // 休息 10 秒再嘗試連線
+                    var delayInterval = _configuration.GetValue<int>("RabbitMq:RetryInterval", 5);
+                    await Task.Delay(TimeSpan.FromSeconds(delayInterval), stoppingToken);
+                }
             }
         }
 
