@@ -87,7 +87,7 @@
       <td>開源後端平台 (BaaS)，提供全託管 PostgreSQL 與整合式物件儲存 (Storage) 服務</td>
     </tr>
     <tr>
-      <td rowspan="2"><b>系統環境</b></td>
+      <td rowspan="4"><b>系統環境</b></td>
       <td><b>Redis</b></td>
       <td>分散式快取，利用 TTL 機制管理 Refresh Token 與一次性 Token (OTP) 生命週期</td>
     </tr>
